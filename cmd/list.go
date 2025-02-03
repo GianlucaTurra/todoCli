@@ -5,8 +5,16 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/fatih/color"
+	"github.com/rodaine/table"
 	"github.com/spf13/cobra"
 )
+
+type row struct {
+	id        int
+	name      string
+	completed int
+}
 
 // listCmd represents the list command
 var listCmd = &cobra.Command{
@@ -34,17 +42,22 @@ var listCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 		defer rows.Close()
+
+		headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
+		columnFmt := color.New(color.FgYellow).SprintfFunc()
+		table := table.New("ID", "Name", "Completed")
+		table.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+
 		for rows.Next() {
-			var id int
-			var name string
-			var completedInt int
-			err = rows.Scan(&id, &name, &completedInt)
+			var row row
+			err = rows.Scan(&row.id, &row.name, &row.completed)
 			if err != nil {
 				log.Fatal(err)
 			}
-			completed := completedInt == 1
-			fmt.Println(id, name, completed)
+			// fmt.Println(row.id, row.name, row.completed == 1)
+			table.AddRow(row.id, row.name, row.completed == 1)
 		}
+		table.Print()
 		err = rows.Err()
 		if err != nil {
 			log.Fatal(err)
