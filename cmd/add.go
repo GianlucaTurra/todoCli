@@ -4,16 +4,20 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/spf13/cobra"
 )
+
+var dueDate string
+var description string
 
 var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Add a new TODO",
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) > 1 {
-			fmt.Println("Only one argument supported for add")
+		if len(args) != 1 {
+			fmt.Println("This command is supposed to receive one argument: the task's name")
 			return
 		}
 
@@ -28,13 +32,13 @@ var addCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		statement, err := tx.Prepare("insert into todos (name) values (?)")
+		statement, err := tx.Prepare("insert into todos (name, description, dueDate) values (?, ?, ?)")
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer statement.Close()
 
-		_, err = statement.Exec(args[0])
+		_, err = statement.Exec(args[0], description, dateToUnix(dueDate))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -48,14 +52,19 @@ var addCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(addCmd)
+	addCmd.Flags().StringVar(&dueDate, "due-date", "", "Set a deadline for yourself")
+	addCmd.Flags().StringVarP(&description, "description", "d", "", "A verbose description for the task")
+}
 
-	// Here you will define your flags and configuration settings.
+func dateToUnix(date string) int64 {
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// addCmd.PersistentFlags().String("foo", "", "A help for foo")
+	if date == "" {
+		return time.Now().Unix()
+	}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// addCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	t, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return t.Unix()
 }

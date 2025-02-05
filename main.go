@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+
 	db, err := sql.Open("sqlite3", "./todo.db")
 	if err != nil {
 		log.Fatal(err)
@@ -19,7 +20,9 @@ func main() {
 	create table if not exists todos (
 		id integer not null primary key autoincrement,
 		name text not null,
-		compleated integer not null default 0
+		description text,
+		dueDate integer default 0,
+		completed integer not null default 0
 	)
 	`
 
