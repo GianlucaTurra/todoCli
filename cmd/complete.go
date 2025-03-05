@@ -30,7 +30,7 @@ var completeCmd = &cobra.Command{
 		if updateAll {
 			statement = "update todos set completed = 1"
 		} else {
-			statement = fmt.Sprintf("update todos set completed = 1 where name = '%s'", args[0])
+			statement = fmt.Sprintf("update todos set completed = 1 where id = %s", args[0])
 		}
 
 		_, err = db.Exec(statement)

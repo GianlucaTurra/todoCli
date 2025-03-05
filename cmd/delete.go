@@ -22,8 +22,8 @@ var deleteCmd = &cobra.Command{
 			log.Fatal("Delete all tasks and all completed tasks... which one?")
 		}
 
-		if len(args) != 1 && (all || allCompleted) {
-			log.Fatal("Select a tasks of user `all`/`allCompleted`")
+		if len(args) > 0 && (all || allCompleted) {
+			log.Fatal("Select a tasks or use `all`/`allCompleted`")
 		}
 
 		db, err := sql.Open("sqlite3", "./todo.db")
